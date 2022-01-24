@@ -280,6 +280,7 @@ class ImagBehavior(nn.Module):
     if not self._config.future_entropy and (self._config.actor_state_entropy() > 0):
       actor_target += self._config.actor_state_entropy() * state_ent[:-1]
     actor_loss = -torch.mean(weights[:-1] * actor_target)
+    
     return actor_loss, metrics
 
   def _update_slow_target(self):
@@ -289,5 +290,3 @@ class ImagBehavior(nn.Module):
         for s, d in zip(self.value.parameters(), self._slow_value.parameters()):
           d.data = mix * s.data + (1 - mix) * d.data
       self._updates += 1
-
-
