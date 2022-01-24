@@ -114,7 +114,7 @@ class Dreamer(nn.Module):
     latent = {k: v.detach()  for k, v in latent.items()}
     action = action.detach()
     if self._config.actor_dist == 'onehot_gumble':
-      action = torch.one_hot(torch.argmax(aciton, dim=-1), self._config.num_actions)
+      action = torch.one_hot(torch.argmax(action, dim=-1), self._config.num_actions)
     action = self._exploration(action, training)
     policy_output = {'action': action, 'logprob': logprob}
     state = (latent, action)
@@ -184,6 +184,47 @@ def make_env(config, logger, mode, train_eps, eval_eps):
         mode if 'train' in mode else 'test',
         config.action_repeat)
     env = wrappers.OneHotAction(env)
+  elif suite == "minigrid":
+    import gym
+    import gym_minigrid
+    import fourroom_cstm
+    from gym_minigrid.wrappers import ReseedWrapper, RGBImgPartialObsWrapper, ImgObsWrapper
+    from minigrid_wrappers import RGBImgFullGridWrapper, ChannelFirstImgWrapper, \
+      RGBImgResizeWrapper, ActionMaskingWrapper, RenderWithoutHighlightWrapper
+    custom_env_ids = {
+      "fourrooms11": "MiniGrid-FourRooms-Size11-v0"
+    }
+    assert task in list(custom_env_ids.keys()), f"Unsupported task: {config.task}"
+    env_id = custom_env_ids[task]
+
+    env = gym.make(env_id)
+    if not config.no_reseed:
+        env = ReseedWrapper(env, seeds=config.env_seeds)
+    else:
+        env.seed(config.seed)
+    
+        # Selets the type of observation the agent receives
+    if config.env_obs_type == "img_full_obs":
+        env = RGBImgFullGridWrapper(env)
+        env = RGBImgResizeWrapper(env, image_size=config.env_img_size)
+    elif config.env_obs_type == "img_partial_obs":
+        env = RGBImgPartialObsWrapper(env)
+        env = RGBImgResizeWrapper(env, image_size=config.env_img_size)
+    else:
+        raise NotImplementedError
+    
+    env = ImgObsWrapper(env)
+    env = ChannelFirstImgWrapper(env)
+
+    if len(config.env_masked_actions):
+        env = ActionMaskingWrapper(env, invalid_actions_list=config.env_masked_actions)
+    
+    env = wrappers.OneHotAction(env)
+    
+    env = RenderWithoutHighlightWrapper(env)
+
+    # Record statistic of env when wrapped
+    env = gym.wrappers.RecordEpisodeStatistics(env)
   else:
     raise NotImplementedError(suite)
   env = wrappers.TimeLimit(env, config.time_limit)

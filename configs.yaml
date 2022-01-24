@@ -283,3 +283,61 @@ debug:
   batch_size: 10
   batch_length: 20
 
+minigrid:
+  # General
+  task: minigrid_fourrooms11
+  steps: 2e6
+  eval_every: 1e4
+  log_every: 1e3
+  prefill: 20000
+  dataset_size: 5e5
+  pretrain: 0
+
+  # Environment
+  time_limit: 100  # 30 minutes of game play.
+  action_repeat: 1
+  grayscale: False
+  eval_noise: 0.0
+  train_every: 16
+  train_steps: 1
+  clip_rewards: 'tanh'
+
+  # Environment: custom minigrid params
+  env_seeds: [222]
+  env_obs_type: "img_full_obs"
+  no_reseed: False
+  env_img_size: [64,64]
+  env_masked_actions: ["pickup", "drop", "toggle", "done"]
+
+  # Model
+  grad_heads: ['image', 'reward', 'discount']
+  dyn_cell: 'gru_layer_norm'
+  pred_discount: True
+  cnn_depth: 48
+  dyn_deter: 300
+  dyn_hidden: 300
+  dyn_stoch: 16
+  dyn_discrete: 16
+  reward_layers: 3
+  discount_layers: 3
+  value_layers: 3
+  actor_layers: 3
+
+  # Behavior
+  actor_dist: 'onehot'
+  actor_entropy: 'linear(3e-3,3e-4,2.5e6)'
+  expl_amount: 0.0
+  discount: 0.999
+  imag_gradient: 'both'
+  imag_gradient_mix: 'linear(0.1,0,2.5e6)'
+
+  # Training
+  discount_scale: 5.0
+  reward_scale: 1
+  weight_decay: 1e-6
+  model_lr: 2e-4
+  kl_scale: 0.1
+  kl_free: 0.0
+  actor_lr: 4e-5
+  value_lr: 1e-4
+  oversample_ends: True
