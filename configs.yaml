@@ -292,6 +292,7 @@ minigrid:
   prefill: 20000
   dataset_size: 5e5
   pretrain: 0
+  batch_length: 10
 
   # Environment
   time_limit: 100  # 30 minutes of game play.
