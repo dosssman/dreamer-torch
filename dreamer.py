@@ -23,7 +23,6 @@ from torch import nn
 from torch import distributions as torchd
 to_np = lambda x: x.detach().cpu().numpy()
 
-
 class Dreamer(nn.Module):
 
   def __init__(self, config, logger, dataset):
@@ -190,7 +189,8 @@ def make_env(config, logger, mode, train_eps, eval_eps):
     import fourroom_cstm
     from gym_minigrid.wrappers import ReseedWrapper, RGBImgPartialObsWrapper, ImgObsWrapper
     from minigrid_wrappers import RGBImgFullGridWrapper, ChannelFirstImgWrapper, \
-      RGBImgResizeWrapper, ActionMaskingWrapper, RenderWithoutHighlightWrapper
+      RGBImgResizeWrapper, ActionMaskingWrapper, RenderWithoutHighlightWrapper, \
+      DictionaryObsWrapper
     custom_env_ids = {
       "fourrooms11": "MiniGrid-FourRooms-Size11-v0"
     }
@@ -214,14 +214,16 @@ def make_env(config, logger, mode, train_eps, eval_eps):
         raise NotImplementedError
     
     env = ImgObsWrapper(env)
-    env = ChannelFirstImgWrapper(env)
+    env = DictionaryObsWrapper(env)
+    # env = ChannelFirstImgWrapper(env)
 
+    # TODO: dictinary obs wrapper
     if len(config.env_masked_actions):
         env = ActionMaskingWrapper(env, invalid_actions_list=config.env_masked_actions)
     
     env = wrappers.OneHotAction(env)
     
-    env = RenderWithoutHighlightWrapper(env)
+    # env = RenderWithoutHighlightWrapper(env)
 
     # Record statistic of env when wrapped
     env = gym.wrappers.RecordEpisodeStatistics(env)

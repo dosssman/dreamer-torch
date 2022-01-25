@@ -155,3 +155,11 @@ class RenderWithoutHighlightWrapper(gym.core.Wrapper):
     def render(self, mode="rgb_array"):
         env = self.unwrapped
         return env.render(mode, highlight=False)
+
+class DictionaryObsWrapper(gym.core.ObservationWrapper):
+    def __init__(self, env):
+        super().__init__(env)
+    
+    def observation(self, obs):
+        return {"image": obs}  
+        
