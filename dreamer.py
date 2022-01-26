@@ -292,6 +292,9 @@ def main(config):
     eval_policy = functools.partial(agent, training=False)
     tools.simulate(eval_policy, eval_envs, episodes=1)
     print('Start training.')
+    # THis part is where the training is invoked,
+    # namely by calling _train when calling agent()
+    # See __call__() of Dreamer class above
     state = tools.simulate(agent, train_envs, config.eval_every, state=state)
     torch.save(agent.state_dict(), logdir / 'latest_model.pt')
   for env in train_envs + eval_envs:
