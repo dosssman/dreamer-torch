@@ -289,10 +289,10 @@ minigrid:
   steps: 2e6
   eval_every: 1e4
   log_every: 1e3
-  prefill: 20000
+  prefill: 5000
   dataset_size: 5e5
   pretrain: 0
-  batch_length: 10
+  batch_length: 30
 
   # Environment
   time_limit: 100  # 30 minutes of game play.
