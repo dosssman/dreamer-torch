@@ -34,7 +34,7 @@ class Dreamer(nn.Module):
     self._should_train = tools.Every(config.train_every)
     self._should_pretrain = tools.Once()
     self._should_reset = tools.Every(config.reset_every)
-    self._should_expl = tools.Until(int(
+    self._should_expl = tools.Until(int(2-
         config.expl_until / config.action_repeat))
     self._metrics = {}
     self._step = count_steps(config.traindir)
@@ -114,7 +114,7 @@ class Dreamer(nn.Module):
     latent = {k: v.detach()  for k, v in latent.items()}
     action = action.detach()
     if self._config.actor_dist == 'onehot_gumble':
-      action = torch.one_hot(torch.argmax(aciton, dim=-1), self._config.num_actions)
+      action = torch.one_hot(torch.argmax(action, dim=-1), self._config.num_actions)
     action = self._exploration(action, training)
     policy_output = {'action': action, 'logprob': logprob}
     state = (latent, action)
