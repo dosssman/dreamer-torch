@@ -27,6 +27,11 @@ The below logs are from Tensorboard, you also can see through [Tensorboard logs]
 ![alt text](https://github.com/jsikyoon/dreamer-torch/blob/main/figs/freeway_logs.png?raw=true)
 
 ## How to use
+Installed torch with:
+```bash
+conda install pytorch==1.8.1 torchvision==0.9.1 torchaudio==0.8.1 cudatoolkit=10.2 -c pytorch
+```
+
 For required packages to run this, you can find from [requirements.txt](https://github.com/jsikyoon/dreamer-torch/blob/main/requirements.txt). 
 
 The command to run is exactly same to the official codes, [you can use it](https://github.com/danijar/dreamerv2/tree/faf9e4c606e735f32c8b971a3092877265e49cc2#instructions). 
