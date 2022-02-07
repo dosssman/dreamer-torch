@@ -264,15 +264,15 @@ class ImagBehavior(nn.Module):
     target = torch.stack(target, dim=1)
     if self._config.imag_gradient == 'dynamics':
       actor_target = target
-    elif self._config.imag_gradient == 'reinforce':
+    if self._config.imag_gradient in ['reinforce', 'both']:
+      baseline = self._slow_value(imag_feat[:-1]).mode() \
+        if self._config.slow_actor_target else self.value(imag_feat[:-1]).mode()
       actor_target = policy.log_prob(imag_action)[:-1][:, :, None] * (
-          target - self.value(imag_feat[:-1]).mode()).detach()
-    elif self._config.imag_gradient == 'both':
-      actor_target = policy.log_prob(imag_action)[:-1][:, :, None] * (
-          target - self.value(imag_feat[:-1]).mode()).detach()
-      mix = self._config.imag_gradient_mix()
-      actor_target = mix * target + (1 - mix) * actor_target
-      metrics['imag_gradient_mix'] = mix
+          target - baseline).detach()
+      if self._config.imag_gradient == "both":
+        mix = self._config.imag_gradient_mix()
+        actor_target = mix * target + (1 - mix) * actor_target
+        metrics['imag_gradient_mix'] = mix
     else:
       raise NotImplementedError(self._config.imag_gradient)
     if not self._config.future_entropy and (self._config.actor_entropy() > 0):
