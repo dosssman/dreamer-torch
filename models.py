@@ -173,12 +173,15 @@ class ImagBehavior(nn.Module):
 
     with torch.cuda.amp.autocast(self._use_amp):
       with tools.RequiresGrad(self.actor):
+        # Imagine using the world model
         imag_feat, imag_state, imag_action = self._imagine(
             start, self.actor, self._config.imag_horizon, repeats)
+        # Reward function to comput the target later. Basicaly ffw of rwrad head
         reward = objective(imag_feat, imag_state, imag_action)
         actor_ent = self.actor(imag_feat).entropy()
         state_ent = self._world_model.dynamics.get_dist(
             imag_state).entropy()
+        
         target, weights = self._compute_target(
             imag_feat, imag_state, imag_action, reward, actor_ent, state_ent,
             self._config.slow_actor_target)
@@ -220,8 +223,10 @@ class ImagBehavior(nn.Module):
       action = policy(inp).sample()
       succ = dynamics.img_step(state, action, sample=self._config.imag_sample)
       return succ, feat, action
-    feat = 0 * dynamics.get_feat(start)
-    action = policy(feat).mode()
+    # NOTE TO SELF: this seems to do something before imaginating the first step
+    # something like start from a zero state ?
+    feat = 0 * dynamics.get_feat(start) # Ignore by the step() fn
+    action = policy(feat).mode() # Ignored by the step() fn
     succ, feats, actions = tools.static_scan(
         step, [torch.arange(horizon)], (start, feat, action))
     states = {k: torch.cat([
@@ -236,6 +241,7 @@ class ImagBehavior(nn.Module):
       slow):
     if 'discount' in self._world_model.heads:
       inp = self._world_model.dynamics.get_feat(imag_state)
+      # NOTE: could just use imag_feat instead of inp, no ?
       discount = self._world_model.heads['discount'](inp).mean
     else:
       discount = self._config.discount * torch.ones_like(reward)

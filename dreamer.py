@@ -34,7 +34,7 @@ class Dreamer(nn.Module):
     self._should_train = tools.Every(config.train_every)
     self._should_pretrain = tools.Once()
     self._should_reset = tools.Every(config.reset_every)
-    self._should_expl = tools.Until(int(2-
+    self._should_expl = tools.Until(int(
         config.expl_until / config.action_repeat))
     self._metrics = {}
     self._step = count_steps(config.traindir)
@@ -114,7 +114,7 @@ class Dreamer(nn.Module):
     latent = {k: v.detach()  for k, v in latent.items()}
     action = action.detach()
     if self._config.actor_dist == 'onehot_gumble':
-      action = torch.one_hot(torch.argmax(action, dim=-1), self._config.num_actions)
+      action = torch.one_hot(torch.argmax(aciton, dim=-1), self._config.num_actions)
     action = self._exploration(action, training)
     policy_output = {'action': action, 'logprob': logprob}
     state = (latent, action)
@@ -292,9 +292,6 @@ def main(config):
     eval_policy = functools.partial(agent, training=False)
     tools.simulate(eval_policy, eval_envs, episodes=1)
     print('Start training.')
-    # THis part is where the training is invoked,
-    # namely by calling _train when calling agent()
-    # See __call__() of Dreamer class above
     state = tools.simulate(agent, train_envs, config.eval_every, state=state)
     torch.save(agent.state_dict(), logdir / 'latest_model.pt')
   for env in train_envs + eval_envs:
