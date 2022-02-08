@@ -98,7 +98,7 @@ class RSSM(nn.Module):
     return state
 
   def observe(self, embed, action, state=None):
-    swap = lambda x: x.permute([1, 0] + list(range(2, len(x.shape))))
+    swap = lambda x: x.permute([1, 0] + list(range(2, len(x.shape)))) # from B, T, X to T, B, X it seems
     if state is None:
       state = self.initial(action.shape[0])
     embed, action = swap(embed), swap(action)

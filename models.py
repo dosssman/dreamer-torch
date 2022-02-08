@@ -225,8 +225,8 @@ class ImagBehavior(nn.Module):
       return succ, feat, action
     # NOTE TO SELF: this seems to do something before imaginating the first step
     # something like start from a zero state ?
-    feat = 0 * dynamics.get_feat(start) # Ignore by the step() fn
-    action = policy(feat).mode() # Ignored by the step() fn
+    feat = 0 * dynamics.get_feat(start)
+    action = policy(feat).mode()
     succ, feats, actions = tools.static_scan(
         step, [torch.arange(horizon)], (start, feat, action))
     states = {k: torch.cat([
@@ -279,6 +279,7 @@ class ImagBehavior(nn.Module):
       mix = self._config.imag_gradient_mix()
       actor_target = mix * target + (1 - mix) * actor_target
       metrics['imag_gradient_mix'] = mix
+      metrics["actor_entropy_scale"] = self._config.actor_entropy()
     else:
       raise NotImplementedError(self._config.imag_gradient)
     if not self._config.future_entropy and (self._config.actor_entropy() > 0):
